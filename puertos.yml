@@ -6,6 +6,7 @@
       - 4440
       - 8080
       - 440
+      - 7070
   tasks:
     - name: "Ver puertos"
       ansible.builtin.debug:
