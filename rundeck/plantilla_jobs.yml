@@ -1,0 +1,11 @@
+jobs_rundeck:
+  trabajos:
+    - name: trabajo1
+      servicio: 'sshd'
+      # HOSTFILTER: 'rhel79santander1'
+      inventario: 'bote1.yml'
+    - name: trabajo2
+      servicio: 'sshd'
+      # HOSTFILTER: 'rhel8santander'
+      inventario: 'bote2.yml'
+      

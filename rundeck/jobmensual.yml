@@ -1,0 +1,11 @@
+- hosts: localhost
+  tasks:
+    - name: "Cargar plantilla"
+      ansible.builtin.include_vars: plantilla_jobs.yml
+    - name: "Llamar al job"
+      ansible.builtin.include_tasks: llamada_job.yml
+      vars:
+        servicio: "{{ item.servicio }}"
+        inventario: "{{ item.inventario }}"
+        # HOSTFILTER: "{{ item.HOSTFILTER }}"
+      loop: "{{ jobs_rundeck | community.general.json_query('trabajos') }}"

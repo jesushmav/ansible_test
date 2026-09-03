@@ -1,0 +1,28 @@
+# Utilizando uri
+- name: "Utilizando uri y webhook"
+  hosts: localhost
+  tasks:
+    - name: "Ejecutar job de rundeck utilizando webhook y uri"
+      ansible.builtin.uri:
+        url: http://rhel9aap.miinformatica.es:4440/api/47/webhook/Jlm5BmvZFCotfJOOgop4rYu1yL5A7ELk#servicio
+        method: POST
+        return_content: true
+        body_format: json
+        headers:
+          X-Rundeck-Auth-Token: qhzQ76TSBl0NFM7uJy85gCJduwMasgBc
+        body:
+          servicio: sshd
+          HOSTFILTER: 'rhel79santander1 rhel8santander'
+
+# Utilizando rundeck_job_run
+- name: "Run a Rundeck job"
+  hosts: localhost
+  tasks:
+    - name: "Trigger Rundeck job"
+      community.general.rundeck_job_run:
+        url: "http://rhel9aap.miinformatica.es:4440"
+        api_token: "qhzQ76TSBl0NFM7uJy85gCJduwMasgBc"
+        job_id: "b7f4140a-b532-415a-8ae7-80d8ec9e708b"
+        job_options:
+          servicio: 'sshd'
+          HOSTFILTER: 'rhel79santander1'

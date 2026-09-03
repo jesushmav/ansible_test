@@ -1,0 +1,108 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: "Realizar copia de seguridad de /etc/fstab"
+      ansible.builtin.copy:
+        src: /etc/fstab
+        dest: '/etc/fstab.{{ cambio }}'
+        remote_src: true
+      tags: ["desmontar", "desmontar_eliminar"]
+
+    - name: "Obtener puntos-montaje"
+      ansible.builtin.setup:
+        filter:
+          - 'ansible_mounts'
+      register: puntos_montaje
+      tags: ["desmontar", "desmontar_eliminar"]
+
+    - name: "Capturar datos del punto de montaje {{ puntomontaje }}"
+      ansible.builtin.set_fact:
+        lvname: "{{ item.device.split('/')[-1].split('-')[1:]| join }}"
+        vgname: "{{ item.device.split('/')[-1].split('-')[0] }}"
+      loop: "{{ puntos_montaje.ansible_facts.ansible_mounts }}"
+      when: item.mount == puntomontaje
+      ignore_errors: true
+      tags: ["desmontar", "desmontar_eliminar"]
+
+    - name: "Operaciones a realizar cuando existe el punto de montaje"
+      block:
+        - name: "Convertir punto de montaje a caracteres"
+          ansible.builtin.set_fact:
+            nombre_punto_montaje: "{{ puntomontaje |regex_replace('/','_') | regex_replace('^_','') }}"
+          tags: ["desmontar", "desmontar_eliminar"]
+        - name: "Desmontar {{ puntomontaje }} y eliminar del fstab"
+          ansible.posix.mount:
+            path: "{{ puntomontaje }}"
+            state: absent
+          register: desmontaje
+          tags: ["desmontar", "desmontar_eliminar"]
+        - name: "Ver datos del lv despues de desmontarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+          ansible.builtin.debug:
+            msg: "El lv es {{ lvname }} y el nombre del punto de montaje es {{ nombre_punto_montaje }}"
+          tags: ["desmontar", "desmontar_eliminar"]
+        - name: "Renombrar lv"
+          ansible.builtin.shell: |
+            lvrename {{ vgname }} {{ lvname }} {{ lvname }}_{{ nombre_punto_montaje }}_ch{{ cambio }}
+          register: renamelv
+          tags: ["desmontar"]
+        - name: "Eliminar lv"
+          community.general.lvol:
+            vg: "{{ vgname }}"
+            lv: "{{ lvname }}"
+            state: absent
+            force: true
+          tags: ["desmontar_eliminar"]
+      rescue:
+        - name: "Tareas ha realizar cuando el fs esta en uso"
+          block:
+            - name: "Restaurar copia de seguridad de /etc/fstab"
+              ansible.builtin.copy:
+                src: '/etc/fstab.{{ cambio }}'
+                dest: /etc/fstab
+                remote_src: true
+              tags: ["desmontar", "desmontar_eliminar"]
+            - name: "Mensaje de error cuando el fs esta en uso "
+              ansible.builtin.debug:
+                msg: "El directorio {{ puntomontaje }} tiene procesos en ejecucion"
+              tags: ["desmontar", "desmontar_eliminar"]
+      when: lvname is defined
+
+    - name: "Operaciones a realizar cuando no existe el punto de montaje"
+      ansible.builtin.debug:
+        msg: "No existe el punto de montaje {{ puntomontaje }}"
+      tags: ["desmontar", "desmontar_eliminar"]
+      when: lvname is not defined
+
+    - name: "Convertir punto de montaje a caracteres"
+      ansible.builtin.set_fact:
+        nombre_punto_montaje: "{{ puntomontaje |regex_replace('/','_') | regex_replace('^_','') }}"
+      tags: ["eliminar"]
+
+    - name: "Obtener datos de lv a eliminar"
+      ansible.builtin.shell: |
+        lvs |grep _{{ nombre_punto_montaje }}_ch{{ cambio }} |awk {'print $1, $2'}
+      register: datos_lv_eliminar
+      tags: ["eliminar"]
+
+    - name: "Visualiza datos obtenidos del lv"
+      ansible.builtin.fail:
+        msg: "Datos incorrectos"
+      when: datos_lv_eliminar.stdout_lines is defined and datos_lv_eliminar.stdout_lines | length != 1
+      tags: ["eliminar"]
+
+    - name: "Visualizar datos del lv a eliminar"
+      ansible.builtin.debug:
+        msg: "El vg es {{ datos_lv_eliminar.stdout_lines[0].split(' ')[1] }} y el lv es {{ datos_lv_eliminar.stdout_lines[0].split(' ')[0] }}"
+      when: datos_lv_eliminar.stdout_lines is defined and datos_lv_eliminar.stdout_lines | length == 1
+      tags: ["eliminar"]
+
+    - name: "Eliminar lv"
+      community.general.lvol:
+        vg: "{{ datos_lv_eliminar.stdout_lines[0].split(' ')[1] }}"
+        lv: "{{ datos_lv_eliminar.stdout_lines[0].split(' ')[0] }}"
+        state: absent
+        force: true
+      when: datos_lv_eliminar.stdout_lines is defined and datos_lv_eliminar.stdout_lines | length == 1
+      tags: ["eliminar"]
+      

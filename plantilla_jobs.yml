@@ -1,0 +1,9 @@
+jobs_rundeck:
+  trabajos:
+    - name: trabajo1
+      servicio: 'sshd'
+      HOSTFILTER: 'rhel79santander1'
+    - name: trabajo2
+      servicio: 'sshd'
+      HOSTFILTER: 'rhel8santander'
+      

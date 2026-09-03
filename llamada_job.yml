@@ -1,0 +1,9 @@
+- name: "Trigger Rundeck job"
+  community.general.rundeck_job_run:
+    url: "http://rhel9aap.miinformatica.es:4440"
+    api_token: "qhzQ76TSBl0NFM7uJy85gCJduwMasgBc"
+    job_id: "b7f4140a-b532-415a-8ae7-80d8ec9e708b"
+    job_options:
+      servicio: '{{ servicio }}'
+      HOSTFILTER: '{{ HOSTFILTER }}'
+      

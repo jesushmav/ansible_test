@@ -1,0 +1,26 @@
+- hosts: all
+  vars:
+    puertos:
+      - 22
+      - 80
+      - 4440
+  tasks:
+    - name: "Ver puertos"
+      ansible.builtin.debug:
+        msg: "La salida es {{ item | int }}"
+      with_items: "{{ puertos }}"
+
+    - name: "Chequear puertos"
+      ansible.builtin.wait_for:
+        host: 192.168.1.125
+        port: "{{ item | int }}" 
+        timeout: 10
+        state: started
+      register: salida
+      with_items: "{{ puertos }}"
+      ignore_errors: true
+
+    - name: "Ver resultado"
+      ansible.builtin.debug:
+        msg: "La salida es {{ item }}"
+      with_items: "{{ salida.results }}"

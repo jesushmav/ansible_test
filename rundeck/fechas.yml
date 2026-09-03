@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  vars:
+    fecha: '2025-02-28 03:00:00'
+    ts_invierno: 1729990800
+    ts_verano: 1743213600
+    ajuste: 0
+  tasks:
+    - name: "Obtener ts de la fecha"
+      ansible.builtin.set_fact:
+        fecha_ts: "{{ (fecha | to_datetime).strftime('%s') | int }}"
+
+    - name: "Visualizar fecha_ts"
+      ansible.builtin.debug:
+        msg: " la fecha es {{ fecha }} y su ts es {{ fecha_ts }}"
+
+    - name: "Establecer ajuste"
+      ansible.builtin.set_fact:
+        ajuste: 1
+      when:
+        - '{{ fecha_ts }} > {{ ts_invierno }}'
+        - '{{ fecha_ts }} < {{ ts_verano }}'
+
+    - name: "Visualizar ajuste"
+      ansible.builtin.debug:
+        msg: " El ajuste es {{ ajuste }}"
