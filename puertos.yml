@@ -16,6 +16,7 @@
     - name: "Chequear puertos"
       ansible.builtin.wait_for:
         host: 192.168.1.125
+        #host2: 192.168.1.125
         port: "{{ item | int }}" 
         timeout: 10
         state: started
@@ -23,7 +24,7 @@
       with_items: "{{ puertos }}"
       ignore_errors: true
 
-    - name: "Ver resultado"
+    - name: "Ver resultados"
       ansible.builtin.debug:
         msg: "La salida es {{ item }}"
       with_items: "{{ salida.results }}"
