@@ -2,14 +2,14 @@
 - hosts: all
   become: true
   tasks:
-    - name: "Realizar copia de seguridad de /etc/fstab "
+    - name: "Realizar copia de seguridad del fichero /etc/fstab "
       ansible.builtin.copy:
         src: /etc/fstab
         dest: '/etc/fstab.{{ cambio }}'
         remote_src: true
       tags: ["desmontar", "desmontar_eliminar"]
 
-    - name: "Obtener puntos-montaje"
+    - name: "Obtener puntos-montaje del sistema"
       ansible.builtin.setup:
         filter:
           - 'ansible_mounts'
