@@ -37,7 +37,7 @@
             state: absent
           register: desmontaje
           tags: ["desmontar", "desmontar_eliminar"]
-        - name: "Ver datos del lv despues de desmontarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+        - name: "Ver datos del lv despues de desmontar"
           ansible.builtin.debug:
             msg: "El lv es {{ lvname }} y el nombre del punto de montaje es {{ nombre_punto_montaje }}"
           tags: ["desmontar", "desmontar_eliminar"]
