@@ -27,7 +27,7 @@
 
     - name: "Operaciones a realizar cuando existe el punto de montaje"
       block:
-        - name: "Convertir punto de montaje a caracteres"
+        - name: "Convertir punto de montaje a caracteres mediante regex_replace"
           ansible.builtin.set_fact:
             nombre_punto_montaje: "{{ puntomontaje |regex_replace('/','_') | regex_replace('^_','') }}"
           tags: ["desmontar", "desmontar_eliminar"]
