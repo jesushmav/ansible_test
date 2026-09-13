@@ -9,7 +9,7 @@
         remote_src: true
       tags: ["desmontar", "desmontar_eliminar"]
 
-    - name: "Obtener puntos-montaje del sistema"
+    - name: "Obtener puntos-montaje del sistema Red Hat"
       ansible.builtin.setup:
         filter:
           - 'ansible_mounts'
